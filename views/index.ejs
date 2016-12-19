@@ -1,0 +1,819 @@
+<!doctype html>
+<html>
+	<head>
+		<% include partials/head %>
+	</head>
+	<body>
+
+		<nav>
+			<% include partials/sidebar %>
+		</nav>
+
+		<div class="main">
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					<div class="uk-panel uk-panel-box">
+						<h3 class="uk-panel-title">Find User by SteamID64 & UserID</h3>
+						<form class="uk-form">
+							<fieldset>
+								<div class="uk-form-row"><input id="id64-field" placeholder="Steam ID64" type="text"></div>
+								<div class="uk-form-row"><input id="userid-field" placeholder="Steam UserID" type="text"></div>
+								<div class="uk-form-row"><input id="ref-field" placeholder="Ref Code" type="text"></div>
+							</fieldset>
+						</form>
+						<button class="uk-button" id="user-clear">Clear</button>
+						<button class="uk-button uk-button-primary" id="user-search">Submit</button>
+					</div>
+				</div>
+			</div>
+			<div class="uk-grid">
+				<div class="uk-width-1-2">
+					<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+						<div class="uk-panel-badge"><button id="user-edit" class="uk-button uk-button-primary" data-uk-modal="{target:'#user-modal'}">Edit</button></div>
+						<h3 class="uk-panel-title">Results</h3>
+
+                        <div class="extra uk-grid" id="user_search_results">
+                            <div class="uk-width-1-2">
+                                <ul class="uk-list uk-list-striped">
+                                    <li><b>ID: </b><span data-id="_id"></span></li>
+                                    <li><b>ID64: </b><span data-id="openId"></span></li>
+                                    <li><b>Username: </b><span data-id="username"></span></li>
+                                    <li><b>Balance: </b><span data-id="balance"></span></li>
+                                    <li><b>Deposited: </b><span data-id="deposit-value"></span></li>
+                                    <li><b>Played: </b><span data-id="played"></span></li>
+                                    <li><b>Level: </b><span data-id="level"></span></li>
+                                    <li><b>Collected: </b><span data-id="collected"></span></li>
+                                    <li><b>Max Bet: </b><span data-id="max-bet"></span></li>
+                                    <li><b>Ref Code: </b><span data-id="ref-code"></span></li>
+                                    <li><b>Refs: </b><span data-id="referrals"></span></li>
+                                    <li><b>Trade URL: </b><span data-id="tradeUrl"></span></li>
+                                    <li><b>Verified: </b><span data-id="verified"></span></li>
+                                    <li><b>Muted: </b><span data-id="muted"></span></li>
+                                    <li><b>Withdraw Lock: </b><span data-id="withdrawLock"></span></li>
+                                    <li><b>Trade Lock: </b><span data-id="tradeLock"></span></li>
+                                </ul>
+                            </div>
+                            <div class="uk-width-1-2">
+                                <ul class="uk-list uk-list-striped">
+                                    <li><b>Registration Date: </b><span data-id="registrationDate"></span></li>
+                                    <li><b>Last Login: </b><span data-id="lastLoginDate"></span></li>
+                                    <li><b>Registration IP: </b><span data-id="registrationIp"></span></li>
+                                    <li><b>Last Login IP: </b><span data-id="loginIp"></span></li>
+                                </ul>
+
+
+                            </div>
+                        </div>
+
+                        <div class="extra uk-grid">
+                            <div class="uk-width-1-3">
+                                <a data-id="export-bets" class="uk-button uk-width-1-1" target="_blank">Export Bet History</a>
+                            </div>
+                            <div class="uk-width-1-3">
+                                <a data-id="export-sends" class="uk-button uk-width-1-1" target="_blank">Export User Transfer History</a>
+                            </div>
+                        </div>
+
+                        <div class="extra uk-grid" id="user_bets_results">
+                            <div class="uk-width-1-3">
+                                <ul class="uk-list uk-list-striped">
+                                    <li><b>Deposited: </b><span data-id="deposited"></span></li>
+                                    <li><b>Withdrawn: </b><span data-id="withdrawn"></span></li>
+                                    <li><b>Credited: </b><span data-id="credited"></span></li>
+                                    <li><b>Deposit Credited: </b><span data-id="deposit_credited"></span></li>
+                                    <li><b>Refunded: </b><span data-id="refunded"></span></li>
+                                    <li><b>Deposit Refunded: </b><span data-id="deposit_refunded"></span></li>
+                                    <li><b>Sends: </b><span data-id="sends_total"></span></li>
+                                    <li><b>Transaction Profit: </b><span data-id="transaction_profit"></span></li>
+                                </ul>
+                            </div>
+                            <div class="uk-width-1-3">
+                                <button class="uk-button" id="bet-refresh">Load</button>  <a class="uk-button" id="estimated-balance">Estimated Balance</a>
+                                <ul class="uk-list uk-list-striped">
+                                    <li><b>Total Bet: </b><span data-id="bets"></span></li>
+                                    <li><b>Total Winnings: </b><span data-id="winnings"></span></li>
+                                    <li><b>Bet Profit: </b><span data-id="bet_profit"></span></li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="extra uk-grid uk-hidden" id="estimated-container">
+                            <div class="uk-width-1-1">
+                                <h3>Estimated user balance</h3>
+                                <table class="uk-table" id="user-estimated-table">
+                                    <tbody>
+                                        <tr class="header"><th width="50%">SkinX Balance</th><td class="sx-total"></td></tr>
+                                        <tr><th>SkinX - Deposits</th><td class="sx-deposits"></td></tr>
+                                        <tr><th>+ SkinX - Transfers Balance</th><td class="sx-transfers"></td></tr>
+                                        <tr><th>+ SkinX - Credits</th><td class="sx-credits"></td></tr>
+                                        <tr><th>+ SkinX - Transfers Received</th><td class="sx-transfers-recv"></td></tr>
+                                        <tr><th>- SkinX - Transfers Sent</th><td class="sx-transfers-sent"></td></tr>
+                                        <tr><th>- SkinX - Withdraws</th><td class="sx-withdraws"></td></tr>
+                                        <tr><th>&nbsp; SkinX - Refunds</th><td class="sx-refunds"></td></tr>
+                                        <tr class="header"><th>CSG500 Balance</th><td class="c5-total"></td></tr>
+                                        <tr><th>CSG500 - Transfers Balance</th><td class="c5-transfers"></td></tr>
+                                        <tr><th>+ CSG500 - Credits</th><td class="c5-credits"></td></tr>
+                                        <tr><th>+ CSG500 - Deposit Credits</th><td class="c5-credits-deposits"></td></tr>
+                                        <tr><th>+ CSG500 - Collected Reward</th><td class="c5-reward"></td></tr>
+                                        <!-- <tr><th>CSG500 - Bets Played</th><td class="c5-bets-played"></td></tr> -->
+                                        <tr><th>+ CSG500 - Bets Balance</th><td class="c5-bets-balance"></td></tr>
+                                        <!-- <tr><th>CSG500 - Duels Played</th><td class="c5-duels-played"></td></tr> -->
+                                        <tr><th>+ CSG500 - Duels Balance</th><td class="c5-duels-balance"></td></tr>
+                                        <tr><th>&nbsp; CSG500 - Refunds</th><td class="c5-refunds"></td></tr>
+                                        <tr class="header total"><th>Total Balance</th><td class="grand-total"></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+						<div class="extra uk-grid">
+							<div class="uk-width-1-3">
+								<table class="uk-table sortable" id="user_bets_table">
+									<thead>
+										<tr>
+											<th>Value</th>
+											<th>Color</th>
+											<th>Date</th>
+										</tr>
+									</thead>
+									<tbody data-id="body">
+                                        <tr data-partial="row">
+											<td data-id="value"></td>
+											<td data-id="color"></td>
+											<td data-id="date"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="uk-width-1-2">
+					<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+						<div class="uk-overflow-container">
+                            <div class="uk-accordion" data-uk-accordion="{showfirst:false}" id="user-accordion">
+                                <h3 class="uk-accordion-title"><i class="uk-icon-refresh spinner-user-transactions"></i> User Transactions</h3>
+                                <div class="uk-accordion-content" data-refresh="refresh_user_transactions">
+        							<table class="uk-table">
+        								<thead>
+        									<tr>
+        										<th>Transaction ID</th>
+        										<th>Action</th>
+        										<th>Value</th>
+        										<th>Trade Offer ID</th>
+        										<th>Skins</th>
+        										<th>Confirmation Code</th>
+        										<th>Bot64ID</th>
+        										<th>State</th>
+        										<th>Date</th>
+        									</tr>
+        								</thead>
+        								<tbody id="transactions">
+        								</tbody>
+        							</table>
+                                </div>
+
+                                <h3 class="uk-accordion-title"><i class="uk-icon-refresh spinner-user-transfers"></i> User Transfers</h3>
+                                <div class="uk-accordion-content" data-refresh="refresh_user_transfers">
+                                    <table class="uk-table">
+        								<thead>
+        									<tr>
+        										<th>Type</th>
+        										<th>From</th>
+        										<th>To</th>
+        										<th>Value</th>
+        										<th>Date</th>
+        									</tr>
+        								</thead>
+        								<tbody id="user-transfers">
+        								</tbody>
+        							</table>
+                                </div>
+                            </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<a href="#user-modal" data-uk-modal>...</a>
+		<div id="user-modal" class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-dialog-large">
+				<div class="uk-modal-header">Edit User <span id="modal-user"></span></div>
+                <div class="uk-grid">
+                    <div class="uk-width-1-2">
+    				<form id="credit-submit" class="uk-form uk-form-stacked">
+                        <div class="uk-form-row">
+                            <label class="uk-form-label" for="">Credit</label>
+                            <label><input type="checkbox" id="credit-is-refund" value="1" checked="checked" /> This is a refund for missing credits</label>
+                        </div>
+    					<div class="uk-form-row">
+    						<input class="uk-form-width-small" id="credit-skinxvalue-field" placeholder="SkinX Value" type="number">
+    						<input class="uk-form-width-small" id="credit-value-field" placeholder="Value" type="number">
+    						<input class="uk-form-width-small" id="credit-deposit-field" placeholder="Deposit Value" type="number">
+    						<button class="uk-button uk-button-primary uk-margin-remove" style="margin-top: 10px;">Submit</button>
+    					</div>
+    				</form>
+
+                    <table class="uk-table">
+                        <tbody>
+                            <tr class="tr-mute-status">
+                                <th>Mute Status: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1" id="unmute">Unmuted</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1" id="mute">Permanent Mute</button></td>
+                            </tr>
+                            <tr class="tr-withdraw-lock">
+                                <th>Withdraws Lock: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1 user-lock-button" id="withdraws-unlock">Unlocked</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1 user-lock-button" id="withdraws-lock">Locked</button></td>
+                            </tr>
+                            <tr class="tr-deposit-lock">
+                                <th>Deposits Lock: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1 user-lock-button" id="deposits-unlock">Unlocked</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1 user-lock-button" id="deposits-lock">Locked</button></td>
+                            </tr>
+                            <tr class="tr-bets-lock">
+                                <th>Bets Lock: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1 user-lock-button" id="bets-unlock">Unlocked</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1 user-lock-button" id="bets-lock">Locked</button></td>
+                            </tr>
+                            <tr class="tr-duels-lock">
+                                <th>Duels Lock: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1 user-lock-button" id="duels-unlock">Unlock Duels</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1 user-lock-button" id="duels-lock">Lock Duels</button></td>
+                            </tr>
+                            <tr class="tr-sends-lock">
+                                <th>Sends Lock: <span></span></th>
+                                <td><button class="uk-button uk-button-success uk-width-1-1 user-lock-button" id="sends-unlock">Unlock Sends</button></td>
+                                <td><button class="uk-button uk-button-danger uk-width-1-1 user-lock-button" id="sends-lock">Lock Sends</button></td>
+                            </tr>
+                            <tr class="tr-trade-lock">
+                                <th>Trade Lock: <span></span></th>
+                                <td colspan="2"><button class="uk-button uk-button-danger" id="clear-tradelock">Clear Trade Lock</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="uk-width-1-2">
+                    <h3>User Notes</h3>
+                    <a id="user-add-note" class="uk-button" target="_blank">Add Note</a>
+                    <div id="user-note" class="uk-hidden">
+                        <div class="uk-form-row">
+                            <label class="uk-form-label">User Note:</label> <a id="user-cancel-note" href="javascript:;">(Cancel)</a>
+                            <br />
+                            <textarea id="user-note-content" class="uk-width-1-1"></textarea>
+                            <a id="user-save-note" class="uk-button uk-button-primary" target="_blank">Save Note</a>
+                        </div>
+                    </div>
+                    <ul id="user-notes">
+                    </ul>
+
+                    <% if(role.name === "admin") { %>
+                    <h3>Change Role</h3>
+                    <p id="current-role">Current Role: <strong></strong></p>
+
+                    <div class="uk-form-select" data-uk-form-select>
+                        <span></span>
+                        <select id="user-new-role">
+                            <option value="mod">Moderator</option>
+                            <option value="chatmod">Chat Moderator</option>
+                            <option value="veteran">Veteran</option>
+                            <option value="regular">Regular</option>
+                        </select>
+                    </div>
+
+                    <p><a id="user-save-role" class="uk-button uk-button-primary" target="_blank">Change Role</a></p>
+
+                    <% } %>
+                </div>
+            </div>
+			</div>
+		</div>
+
+		<div class="skin-content">
+			<form id="skin-search" class="uk-form uk-form-stacked">
+				<div class="uk-form-row">
+					<input id="skin-search-name" placeholder="Name" type="text">
+					<button id="skin-search-submit" class="uk-button uk-button-primary">Search</button>
+				</div>
+			</form>
+			<table class="uk-table sortable uk-table-hover">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Price</th>
+					</tr>
+				</thead>
+				<tbody id="price-table">
+				</tbody>
+			</table>
+		</div>
+		<a href="#price-modal" data-uk-modal>...</a>
+		<div id="price-modal" class="uk-modal">
+			<div class="uk-modal-dialog">
+				<div class="uk-modal-header">Edit Price - <span id="modal-skin"></span></div>
+				<form id="price-submit-form" class="uk-form uk-form-stacked">
+					<div class="uk-form-row">
+						<label class="uk-form-label" for="">New price</label>
+						<input id="price-adjust-field" placeholder="Price" type="number">
+						<button id="price-submit" class="uk-button uk-button-primary">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="stat-content">
+			<% if(role.name === "admin") { %>
+
+            <div class="uk-accordion" data-uk-accordion="{showfirst:true}" id="stats-accordion">
+
+                <h3 class="uk-accordion-title acc-stats">Stats</h3>
+                <div class="uk-accordion-content acc-stats-content">
+                    <div class="uk-grid">
+    					<div class="uk-width-1-1">
+                			<div class="uk-panel uk-panel-box">
+                				<div class="uk-panel-badge uk-badge"><div id="stats-date"></div></div>
+                				<h3 class="uk-panel-title">Stats</h3>
+                				<div class="uk-grid">
+                					<div class="uk-width-1-2">
+                						<ul class="uk-list">
+                							<li>Total Users: <b><span id='total-users'></span></b></li>
+                							<li>Total Economy: <b><span id='total-economy'></span> Bux</b></li>
+                							<li>Total Withdrawable: <b><span id='total-withdrawable'></span> Bux</b></li>
+                							<li>Total SkinX Economy: <b><span id='total-skinx-economy'></span> CR</b></li>
+                							<li>Total SkinX Withdrawable: <b><span id='total-skinx-withdrawable'></span> CR</b></li>
+                							<li>Total Deposits: <b><span id='total-deposits'></span> Bux</b></li>
+                							<li>Total Withdraws: <b><span id='total-withdraws'></span> Bux</b></li>
+                							<li>Total Referrals: <b><span id='total-referrals'></span></b></li>
+                							<li>Total Shop Items: <b><span id='total-shop-count'></span></b></li>
+                							<li>Total Shop: <b><span id='total-shop'></span> Bux</b></li>
+                							<li>Total Rounds: <b><span id='total-rounds'></span></b></li>
+                							<li>Total Black: <b><span id='total-blacks'></span></b></li>
+                							<li>Total Red: <b><span id='total-reds'></span></b></li>
+                							<li>Total Blue: <b><span id='total-blues'></span></b></li>
+                							<li>Total Yellow: <b><span id='total-yellows'></span></b></li>
+                							<li>Total Bets: <b><span id='total-bet'></span></b></li>
+                							<li>Total Duels: <b><span id='total-duels'></span></b></li>
+                							<li>Total Duels Red: <b><span id='total-duels-red'></span></b></li>
+                							<li>Total Duels Blue: <b><span id='total-duels-blue'></span></b></li>
+                							<li>Total Credits: <b><span id='total-credits'></span></b></li>
+                							<li>Total Uncredits: <b><span id='total-uncredits'></span></b></li>
+                						</ul>
+                					</div>
+                					<div class="uk-width-1-2">
+                						<ul class="uk-list">
+                							<li>24h Deposits: <b><span id='moving-deposits'></span> Bux</b></li>
+                							<li>24h Withdraws: <b><span id='moving-withdraws'></span> Bux</b></li>
+                							<li>24h Referrals: <b><span id='moving-referrals'></span></b></li>
+                							<li>24h Rewards: <b><span id='moving-rewards'></span> Bux</b></li>
+                							<li>24h Rewards Claimed: <b><span id='moving-rewards-user'></span></b></li>
+                							<li>24h Rounds: <b><span id='moving-rounds'></span></b></li>
+                							<li>24h Black: <b><span id='moving-blacks'></span></b></li>
+                							<li>24h Red: <b><span id='moving-reds'></span></b></li>
+                							<li>24h Blue: <b><span id='moving-blues'></span></b></li>
+                							<li>24h Yellow: <b><span id='moving-yellows'></span></b></li>
+                							<li>24h In: <b><span id='moving-in'></span> Bux</b></li>
+                							<li>24h Out: <b><span id='moving-out'></span> Bux</b></li>
+                							<li>24h Bets: <b><span id='moving-bet'></span></b></li>
+                							<li>24h Duels: <b><span id='moving-duels'></span></b></li>
+                							<li>24h Duels Red: <b><span id='moving-duels-red'></span></b></li>
+                							<li>24h Duels Blue: <b><span id='moving-duels-blue'></span></b></li>
+                							<li>24h Duels In: <b><span id='moving-duels-in'></span> Bux</b></li>
+                							<li>24h Duels Out: <b><span id='moving-duels-out'></span> Bux</b></li>
+                							<li>24h Credits: <b><span id='moving-credits'></span></b></li>
+                							<li>24h Uncredits: <b><span id='moving-uncredits'></span></b></li>
+                						</ul>
+                					</div>
+                					<button class="uk-button" id="stats-refresh">Refresh</button>
+                				</div>
+                			</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="uk-accordion-title">Top Balances <i class="uk-icon-refresh uk-icon-spin spinner-top-balances"></i></h3>
+                <div class="uk-accordion-content" data-refresh="refresh_balances">
+                    <div class="uk-grid">
+        				<div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Top CSGO 500 Balances</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Balance</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-500-balance-content">
+                                        <tr class="jqTemplate" id="top_row_loading">
+                                            <td colspan="3"> Working ... </td>
+                                        </tr>
+                                        <tr class="jqTemplate" id="top_row">
+                                            <td class="td-top-user"></td>
+                                            <td class="td-top-value"></td>
+                                            <td class="td-top-locked"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Top Skinx Balances</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Balance</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-skinx-balance-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <h3 class="uk-accordion-title">Top Deposits & Withdraws <i class="uk-icon-refresh uk-icon-spin spinner-top-deposits-withdraws"></i></h3>
+                <div class="uk-accordion-content" data-refresh="refresh_top_deposits">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Top 24H Deposits</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Deposits</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-deposits-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Top 24H Withdraws</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Withdraws</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-withdraws-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="uk-accordion-title">Delta Deposits & Withdraws <i class="uk-icon-refresh uk-icon-spin spinner-delta-deposits-withdraws"></i></h3>
+                <div class="uk-accordion-content" data-refresh="refresh_delta_deposits">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Positive Delta First  (Deposits > Withdraws)</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Delta</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="delta-deposits-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Negative Delta First (Withdraws > Deposits)</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Delta</th>
+                                            <th>Withdraw Lock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="delta-withdraws-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <h3 class="uk-accordion-title">Credit &amp; Skin History</h3>
+                <div class="uk-accordion-content" data-refresh="refresh_credits_skins">
+                    <div class="uk-grid">
+        				<div class="uk-width-1-2">
+        					<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+        						<div class="uk-overflow-container">
+        							<table class="uk-table">
+        								<thead>
+        									<tr>
+        										<th>OpenId</th>
+        										<th>Creditor</th>
+        										<th>SkinX Value</th>
+        										<th>Value</th>
+        										<th>Deposit Value</th>
+        										<th>Date</th>
+        									</tr>
+        								</thead>
+        								<tbody id="credit-history">
+        								</tbody>
+        							</table>
+        						</div>
+        					</div>
+        				</div>
+        				<div class="uk-width-1-2">
+        					<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+        						<div class="uk-overflow-container">
+        							<table class="uk-table">
+        								<thead>
+        									<tr>
+        										<th>Name</th>
+        										<th>Value</th>
+        										<th>OpenId</th>
+        										<th>Date</th>
+        									</tr>
+        								</thead>
+        								<tbody id="skin-history">
+        								</tbody>
+        							</table>
+        						</div>
+        					</div>
+        				</div>
+        			</div>
+                </div>
+
+                <h3 class="uk-accordion-title">Deposits & Withdraws History <i class="uk-icon-refresh uk-icon-spin spinner-deposits-withdraws"></i> </h3>
+                <div class="uk-accordion-content" data-refresh="refresh_list_deposits">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Latest Deposits</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Bot</th>
+                                            <th>Item</th>
+                                            <th>Value</th>
+                                            <th>State</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list-deposits-content">
+                                        <tr class="jqTemplate" id="list_deposit_row">
+                                            <td class="td-user"></td>
+                                            <td class="td-bot"></td>
+                                            <td class="td-item"></td>
+                                            <td class="td-value"></td>
+                                            <td class="td-state"></td>
+                                            <td class="td-date"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Latest Withdraws</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Bot</th>
+                                            <th>Item</th>
+                                            <th>Value</th>
+                                            <th>State</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list-withdraws-content"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="uk-accordion-title">Latest 500 Sends <i class="uk-icon-refresh uk-icon-spin spinner-sends"></i> </h3>
+                <div class="uk-accordion-content" data-refresh="refresh_list_sends">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Latest 500 Sends</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>To</th>
+                                            <th>Value</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list-sends-content">
+                                        <tr class="jqTemplate" id="list_send_row">
+                                            <td class="td-from"></td>
+                                            <td class="td-to"></td>
+                                            <td class="td-value"></td>
+                                            <td class="td-date"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <div class="uk-panel uk-panel-box">
+                				<h3 class="uk-panel-title">Top 500 Sends</h3>
+                                <table class="uk-table">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>To</th>
+                                            <th>Value</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list-top-sends-content">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+			<% } %>
+		</div>
+
+
+		<div class="bot-content">
+			<% if(role.name === "admin") { %>
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					<div class="uk-panel uk-panel-box">
+                        <h2>Bots List</h2>
+                        <p>
+                            <button class="uk-button uk-button-primary" id="bots-refresh-list">Refresh List</button>
+                            <button class="uk-button uk-button-secondary" id="bots-refresh-inventory">Refresh Inventories</button>
+                        </p>
+						<div class="uk-overflow-container">
+							<table class="uk-table" id="bot-list-table">
+								<thead>
+									<tr>
+										<th>Username</th>
+										<th>OpenId</th>
+										<th>Value</th>
+										<th>Items</th>
+										<th>Keys</th>
+										<th>Locks</th>
+										<th>Last Ping</th>
+									</tr>
+								</thead>
+								<tbody id="bot-stats">
+                                    <tr class="jqTemplate" id="bot_row">
+										<td class="td-bot-username"></td>
+										<td class="td-bot-openid"></td>
+										<td class="td-bot-value"></td>
+										<td class="td-bot-items"></td>
+										<td class="td-bot-keys"></td>
+										<td class="td-bot-locks">
+                                            <a class="uk-badge uk-badge-success bot-lock lock-global" data-uk-tooltip title="Global" href="javascript:;"> G </a>
+                                            <a class="uk-badge uk-badge-success bot-lock lock-deposits" data-uk-tooltip title="Deposit" href="javascript:;"> D </a>
+                                            <a class="uk-badge uk-badge-success bot-lock lock-withdraws" data-uk-tooltip title="Withdraw" href="javascript:;"> W </a>
+                                        </td>
+										<td class="td-bot-lastactive"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+            <div class="uk-grid">
+				<div class="uk-width-1-2">
+					<div class="uk-panel uk-panel-box">
+                        <h2>Locks</h2>
+                        <p>
+                            <button class="uk-button uk-button-primary" id="btn-locks-refresh">Refresh Locks</button>
+                        </p>
+                        <h3>Middleman Status</h3>
+						<div class="uk-overflow-container">
+                            <table class="uk-table" id="locks-container">
+								<tbody>
+                                    <tr>
+                                        <th>Middleman: Global Lock: </th><td> <button id="btn-lock-global" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Middleman: Deposits Lock: </th><td> <button id="btn-lock-deposits" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Middleman: Withdraws Lock: </th><td> <button id="btn-lock-withdraws" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Site: Bets Lock: </th><td> <button id="btn-lock-bets" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Site: Duels Lock: </th><td> <button id="btn-lock-duels" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Site: Sends Lock: </th><td> <button id="btn-lock-sends" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Site: AutoLock: </th><td> <button id="btn-autolock" class="uk-button uk-width-1-1">Unknown</button></td>
+                                    </tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+                <div class="uk-width-1-2">
+					<div class="uk-panel uk-panel-box">
+                        <h2>Site Notifications</h2>
+
+                        <h4>CSGO500 Notifications</h4>
+                        <textarea id="site-500-notifications" rows="10" class="uk-width-1-1" placeholder="Notification 1 &#10;&#10;Notification 2"></textarea>
+                        <a class="save-settings uk-button uk-button-primary" data-id="site-500-notifications" data-list="1">Save</a>
+                    </div>
+                </div>
+			</div>
+			<% } %>
+		</div>
+
+        <div class="page-content history-content">
+            <div class="uk-grid">
+                <div class="uk-width-1-2">
+					<div class="uk-panel uk-panel-box">
+						<h3 class="uk-panel-title">History Search</h3>
+                        <form class="uk-form">
+							<fieldset>
+								<div class="uk-form-row"><input id="history-filter-userid" name="userid" placeholder="Search user Steam64ID" type="text"></div>
+								<div class="uk-form-row"><input id="history-filter-confirmation" name="confirmation_code" placeholder="Search confirmation code" type="text"></div>
+							</fieldset>
+						</form>
+                        <button class="uk-button uk-button-primary" id="history-search">Submit</button>
+					</div>
+				</div>
+            </div>
+            <div class="uk-grid">
+                <div class="uk-width-1-1">
+                    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
+						<div class="uk-overflow-container">
+							<table class="uk-table">
+								<thead>
+									<tr>
+										<th>History ID</th>
+										<th>User 64 ID</th>
+										<th>Action</th>
+										<th>Value</th>
+										<th>Trade Offer ID</th>
+										<th>Confirmation Code</th>
+										<th>Bot64ID</th>
+										<th>State</th>
+										<th>Date</th>
+									</tr>
+								</thead>
+								<tbody id="history_table">
+                                    <tr class="jqTemplate" id="history_row_loading">
+										<td colspan="8" class="content">Loading ... </td>
+									</tr>
+                                    <tr class="jqTemplate" id="history_row">
+										<td class="td-transaction-id"></td>
+										<td class="td-user-id"></td>
+										<td class="td-action"></td>
+										<td class="td-value"></td>
+										<td class="td-tradeoffer-id"></td>
+										<td class="td-confirmation-code"></td>
+										<td class="td-bot64id"></td>
+										<td class="td-state"></td>
+										<td class="td-date"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+
+	</body>
+</html>
