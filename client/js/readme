@@ -1,0 +1,55 @@
+# Load Order:
+
+init.js                 - can define global vars & functions here
+app.js                  - class used to break jquery code into 'modules'. can also store helper functions & properties in it
+libs/other_paths/*.js   - libs are loaded before any other custom scripts, use them to define helper functions & classes that other scripts use
+libs/*.js
+other_dirs/**/*.js      - use directories & js files to organize your code
+main.js                 - initializes jQuery & App instance. Main entrypoint.
+
+
+# App hooks
+
+To get access to jQuery inside a custom lib script or module use the App hooks:
+
+App.prototype.onLoad(function(app, $)){ ... });     // provides the current app instance and jquery instance as parameters
+App.prototype.onInit(function(app, $){ ... });      // runs after onLoad();
+
+
+# Example generic helper lib (does not have access to jQuery or the app instance)
+
+file: libs/escaping.js
+
+function escape(object){
+    ...
+    return escaped_object;
+}
+
+# Example helper lib script bound to the app instance: (has access to jQuery & app instance)
+
+file: libs/formatting.js
+
+App.prototype.onLoad(function(app, $){
+
+    app.formatNumber = function(number){
+        ...
+        return formatted_number;
+    }
+
+});
+
+# Using a lib script in a module
+
+file: content/user-badge.js
+
+App.prototype.onInit(function(app, $){
+
+    $('#refresh-money').click(function(){
+        // use generic escape helper
+        var money = escape(user.money);
+
+        // use an app helper
+        $('#user-money').html(app.formatNumber(money));
+    });
+
+});
